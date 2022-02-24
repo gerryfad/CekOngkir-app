@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../courier_model.dart';
+
 class HomeController extends GetxController {
   //TODO: Implement HomeController
   late TextEditingController beratC;
@@ -34,9 +36,29 @@ class HomeController extends GetxController {
     );
 
     var data = json.decode(response.body);
-    var result = data["rajaongkir"]["results"];
+    var results = data["rajaongkir"]["results"] as List<dynamic>;
 
-    print(result);
+    var listAllCourier = Courier.fromJsonList(results);
+    var courier = listAllCourier[0];
+
+    Get.defaultDialog(
+      title: courier.name!,
+      content: Column(
+        children: courier.costs!
+            .map(
+              (e) => ListTile(
+                title: Text("${e.service}"),
+                subtitle: Text("Rp ${e.cost![0].value}"),
+                trailing: Text(
+                  courier.code == "pos"
+                      ? "${e.cost![0].etd}"
+                      : "${e.cost![0].etd} HARI",
+                ),
+              ),
+            )
+            .toList(),
+      ),
+    );
   }
 
   void ubahBerat(String value) {
